@@ -6,14 +6,16 @@ window.onload = function () {
     var btn = document.getElementById('btn');
     btn.addEventListener("click", function confirm() {
         var list = document.getElementById("notes").getElementsByTagName("li");
-
         notes = [];
         //clear notes before adding current notes to object
         for(i=0;i<=list.length-1;i++){
-            var liText = list[i].innerText;
+            var text = list[i].getElementsByTagName("textarea")[0].value;
+            
+            console.log("text:");
+            console.log(text);
             notes.push({
               id:i,
-              noteText: liText
+              noteText: text
             })
         }
         //save innerText of each li to an object to be sent as a post request
