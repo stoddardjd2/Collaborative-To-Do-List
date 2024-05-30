@@ -10,7 +10,7 @@ window.onload = function () {
   var textArea = document.getElementsByClassName("text");
   var hasEventListener;
 
-
+  loadNotes();
   newNoteListener();
   saveNoteListener();
   deleteNoteListener()
@@ -106,7 +106,46 @@ window.onload = function () {
       console.log("event listener detected, cancelling new listener");
     }
   }
-
-}
 //allows user to select items to delete
 
+
+  function loadNotes(){
+    fetch("/loadNotes",{
+      method: "GET",
+    }).then((response) => {
+      if (response.ok) {
+        return response.json();
+      } else {
+        throw new Error('no save file detected to load notes');
+       
+      }
+    })
+    .then((json) => {
+
+      console.log(json.notes.length);
+      for(i=0;i<json.notes.length;i++){
+        var noteText = json.notes[i].noteText;
+        createAndAppendList(noteText);
+      }
+      // Handle the successful response
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+  }
+
+  
+
+  //fetch notes document as json file
+
+function createAndAppendList(text){
+      var newLi = document.createElement("li");
+      var newTextArea = document.createElement("textarea");
+      newTextArea.innerHTML = text;
+
+      newLi.appendChild(newTextArea);
+      ul.appendChild(newLi);
+}
+
+
+}
