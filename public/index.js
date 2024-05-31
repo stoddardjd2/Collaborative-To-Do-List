@@ -9,6 +9,7 @@ window.onload = function () {
   var ul = document.getElementById("notes");
   var undoBtn = document.getElementById("undo");
   var hasEventListener;
+  var tip = document.getElementById("tip");
 
   var undoTracker = [];
 
@@ -16,6 +17,7 @@ window.onload = function () {
   newNoteListener();
   saveNoteListener();
   deleteNoteListener();
+  checkboxEventListener();
   undoListener();
 
   function newNoteListener() {
@@ -206,5 +208,21 @@ window.onload = function () {
 
   }
   //iterates through an array of objects that store each posssible undo request. undo request then sorted based on action needed to be peformed to complete the undo request
+
+
+  function checkboxEventListener(){
+    tip.addEventListener("change",function(){
+      tips();
+    })
+  }
+
+   function tips(){
+    if(tip.checked){
+      console.log("check!")
+      document.addEventListener
+    }else{
+      console.log("not-checked!");
+    }
+   }
 
 }
