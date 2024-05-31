@@ -83,20 +83,17 @@ window.onload = function () {
 
   function deleteNoteListener() {
     deleteBtn.addEventListener("click", selectNotes);
+
   }
   //when delete btn clicked, function to select notes to delete is called
 
 
 
 
-  function selectNotes() {
-    if (!hasEventListener) {
-      //check if event listener already added and prevent duplicates 
-      hasEventListener = true;
-      console.log("adding listener!")
-      console.log("select an item now")
+  function removeSelected(e){
+        deleteBtn.innerText="Delete Note";
 
-      ul.addEventListener("click", function removeSelected(e) {
+
         var selection = e.target;
 
         console.log(selection.parentNode);
@@ -115,15 +112,35 @@ window.onload = function () {
             element: selection.parentNode
           })
 
-          console.log
           //track deleted elements to be used in undo feature
 
           hasEventListener = false;
         }
-      }, { once: true });
+      }
+  
+
+
+  function selectNotes() {
+    if (!hasEventListener) {
+      //check if event listener already added and prevent duplicates 
+      hasEventListener = true;
+      console.log("adding listener!")
+      console.log("select an item now")
+
+      deleteBtn.innerText="Cancel";
+
+      //give option to cancel the deletion listener event using same button with new text value
+      
+    
+      ul.addEventListener("click", removeSelected, {once: true} )
+        
     } else {
-      console.log("event listener detected, cancelling new listener");
+      ul.removeEventListener("click", removeSelected);
+      hasEventListener=false;
+      deleteBtn.innerText="Delete Note";
     }
+    //if cancel deletion is clicked, remove event listener for selecting a note to remove
+    //change flag to show evenlistener is removed and fix btn text
   }
   //allows user to select items to delete
 
