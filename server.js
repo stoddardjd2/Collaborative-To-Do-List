@@ -3,10 +3,42 @@ const express = require('express');
 const app = express();
 const PORT = 3001;
 const path = require('path');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
+const secretKey = 'secret!';
+
+
+let users= [];
+//temporary arrary to store users in server for developmental purposes.
+//add database later
+
+
+//Middleware:
 app.use(express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+
+const authenticateToken = (req,res, next)=>{
+  const authHeader = req.headers['authorization'];
+  console.log(authHeader);
+
+  const token = authHeader.replaceAll('"', '');
+//remove "" from string 
+
+  console.log("i am here")
+  console.log(token);
+
+
+  if(!token) return res.status(401).send('Token required');
+
+  jwt.verify(token, secretKey,(err, user)=>{
+    if(err) return res.status(403).send('Invalid or expired token');
+    req.user = user;
+    next();
+  });
+};
 
 
 app.listen(PORT, () => {
@@ -29,21 +61,42 @@ app.post('/save', (req, res) => {
 app.get('/loadNotes',(req,res)=>{
   res.sendFile(path.join(__dirname, 'notes.json'));
 
+});
 
+app.post('/signup',async(req, res)=>{
+  const{username, password}=req.body;
 
-  /*fs.readFile('notes.json', 'utf-8', (err, data) => {
-    if (err) {
-        throw err;
-    }
-    console.log(data); // Display the file contents
-    res.send(data);
-});*/
+  const hashedPassword = await bcrypt.hash(password,8);
+  //convert password to hash
 
+  users.push({username, password: hashedPassword});
+  res.status(201).send('User added!');
+
+});
+//why async???
+
+//login, validate user, and create token
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+  const user = users.find(u => u.username === username);
+
+  if (!user || !(await bcrypt.compare(password, user.password))) {
+    return res.status(401).send('Invalid credentials');
+  }
+
+  // Generate token
+  const token = jwt.sign({ userId: user.username }, secretKey, { expiresIn: '1h' });
+
+  res.status(200).send({ token });
+});
+
+//generating JWT
+
+app.get('/dashboard', authenticateToken, (req, res) => {
+  console.log(req);
+  res.status(200).send('Welcome to the dashboard, ' + req.body.username);
+
+ // res.status(200).send('Welcome to the dashboard, ' + req.user.userId);
 });
 
 
-//save current notes obtained from post request to a json file
-
-
-
-//get js and css file to work

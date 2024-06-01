@@ -2,6 +2,12 @@
 let notes = [];
 
 window.onload = function () {
+
+  var test = (u=>u.username === username);
+  console.log(test);
+  console.log("running!");
+
+
   var newNoteBtn = document.getElementById("newNote");
   var saveBtn = document.getElementById('save');
   var deleteBtn = document.getElementById('delete')
@@ -60,9 +66,6 @@ window.onload = function () {
       //get text value of each li to be sent to server and saved in database
 
       //add feature to detect which notes were changed and save only what is needed
-
-
-
     });
   }
 
