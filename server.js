@@ -117,29 +117,19 @@ app.post('/signup',async(req, res)=>{
 
 });
 
-//login, validate user, and create token
+//recieve post req, validate user, and create token
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
-
-  console.log("debug");
-  console.log(usersObj);
+  
   var currentUser = usersObj.users.find(o => o.name === username);
-  console.log("debug2");
-  console.log(currentUser.name);
-
-  console.log("debug3");
-
-
 //  const user = usersObj.find(u => u.username === username);
 
-  if (!usersObj.users || !(await bcrypt.compare(password, currentUser.password))) {
+  if (!currentUser || !(await bcrypt.compare(password, currentUser.password))) {
     return res.status(401).send('Invalid credentials');
   }
 
   // Generate token
   const token = jwt.sign({ userId: currentUser.name }, secretKey, { expiresIn: '1h' });
-  console.log("debug4");
-console.log(currentUser.name);
   res.status(200).send({ token });
 });
 
