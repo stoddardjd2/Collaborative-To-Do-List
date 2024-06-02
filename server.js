@@ -7,9 +7,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const secretKey = 'secret!';
+var usersObj;
 
-
-let users= [];
 //temporary arrary to store users in server for developmental purposes.
 //add database later
 
@@ -19,6 +18,17 @@ app.use(express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+loadUsers();
+
+  //loads all user data and saves as an object. Passwords have been previously hashed
+function loadUsers(){
+  fs.readFile('./users.json','utf-8',(err, data)=>{
+    if (err) {
+      throw err;
+  }
+  usersObj = JSON.parse(data);
+  });
+}
 
 const authenticateToken = (req,res, next)=>{
   const authHeader = req.headers['authorization'];
@@ -63,17 +73,52 @@ app.get('/loadNotes',(req,res)=>{
 
 });
 
+app.get('/signup',(req,res)=>{
+  res.sendFile(path.join(__dirname, '/public/signup.html'));
+});
+
+
 app.post('/signup',async(req, res)=>{
   const{username, password}=req.body;
 
-  const hashedPassword = await bcrypt.hash(password,8);
   //convert password to hash
+  const hashedPassword = await bcrypt.hash(password,8);
 
-  users.push({username, password: hashedPassword});
+//add new user info to usersObject 
+  usersObj.users.push({name: username, password: hashedPassword});
+
+  //save changes to local json to be stored for other sessions
+  fs.writeFile('users.json', JSON.stringify(usersObj), function(err){
+    if(err)throw err;
+    console.log("updated user file!");
+  });
+
+  
+
+  
+  
+
+  //convert array of objects to json
+
+  
+  // Write cars object to file
+
+
+
+var json = JSON.stringify(req.body);
+var obj = JSON.parse(json);
+
+
+/*
+
+  fs.appendFile('users.json', JSON.stringify({username, password: hashedPassword}), function(err){
+    if(err)throw err;
+    console.log("user added!");
+  });
+*/
   res.status(201).send('User added!');
 
 });
-//why async???
 
 //login, validate user, and create token
 app.post('/login', async (req, res) => {
@@ -93,7 +138,6 @@ app.post('/login', async (req, res) => {
 //generating JWT
 
 app.get('/dashboard', authenticateToken, (req, res) => {
-  console.log(req);
   res.status(200).send('Welcome to the dashboard, ' + req.body.username);
 
  // res.status(200).send('Welcome to the dashboard, ' + req.user.userId);
