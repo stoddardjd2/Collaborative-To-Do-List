@@ -105,9 +105,6 @@ app.post('/signup',async(req, res)=>{
 
 
 
-var json = JSON.stringify(req.body);
-var obj = JSON.parse(json);
-
 
 /*
 
@@ -123,15 +120,26 @@ var obj = JSON.parse(json);
 //login, validate user, and create token
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
-  const user = users.find(u => u.username === username);
 
-  if (!user || !(await bcrypt.compare(password, user.password))) {
+  console.log("debug");
+  console.log(usersObj);
+  var currentUser = usersObj.users.find(o => o.name === username);
+  console.log("debug2");
+  console.log(currentUser.name);
+
+  console.log("debug3");
+
+
+//  const user = usersObj.find(u => u.username === username);
+
+  if (!usersObj.users || !(await bcrypt.compare(password, currentUser.password))) {
     return res.status(401).send('Invalid credentials');
   }
 
   // Generate token
-  const token = jwt.sign({ userId: user.username }, secretKey, { expiresIn: '1h' });
-
+  const token = jwt.sign({ userId: currentUser.name }, secretKey, { expiresIn: '1h' });
+  console.log("debug4");
+console.log(currentUser.name);
   res.status(200).send({ token });
 });
 
