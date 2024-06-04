@@ -1,6 +1,5 @@
 
 let notes = [];
-
 window.onload = function () {
 
   var test = (u=>u.username === username);
@@ -15,6 +14,7 @@ window.onload = function () {
   var ul = document.getElementById("notes");
   var undoBtn = document.getElementById("undo");
   var hasEventListener;
+  var loginBtn = document.getElementById("login");
 
   var undoTracker = [];
 
@@ -23,6 +23,8 @@ window.onload = function () {
   saveNoteListener();
   deleteNoteListener();
   undoListener();
+  loginBtn.addEventListener("click",loginListener);
+
 
   function newNoteListener() {
     newNoteBtn.addEventListener("click", function () {
@@ -31,7 +33,6 @@ window.onload = function () {
       textarea.innerHTML = "new note!";
       li.appendChild(textarea);
       ul.appendChild(li);
-
 
       undoTracker.push({
         action: "remove",
@@ -51,16 +52,12 @@ window.onload = function () {
       for (i = 0; i <= list.length - 1; i++) {
         var text = list[i].getElementsByTagName("textarea")[0].value;
 
-        console.log("text:");
-        console.log(text);
         notes.push({
           id: i,
           noteText: text
         })
       }
       //save innerText of each li to an object to be sent as a post request
-
-      console.log(notes)
 
       saveReq();
       //get text value of each li to be sent to server and saved in database
@@ -73,13 +70,21 @@ window.onload = function () {
   function saveReq() {
     fetch('/save', {
       method: "POST",
+      headers: {
+        authorization: localStorage.getItem('token'),
+        "Content-type": "application/json; charset=UTF-8"
+      },
       body: JSON.stringify({
         notes
       }),
-      headers: {
-        "Content-type": "application/json; charset=UTF-8"
+    }) .then(response=>{
+      if(!response.ok){
+        console.log("Not authorized, please log in to make changes");
+      }else{
+        console.log("Save authorized");
       }
-    })
+
+    });
   }
 
 
@@ -208,6 +213,11 @@ window.onload = function () {
     })
 
   }
+
+  function loginListener(){
+    window.location.href="http://localhost:3001/login";
+  }
   //iterates through an array of objects that store each posssible undo request. undo request then sorted based on action needed to be peformed to complete the undo request
 
 }
+//if token not present:

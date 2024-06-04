@@ -31,22 +31,19 @@ function loadUsers(){
 }
 
 const authenticateToken = (req,res, next)=>{
+
   const authHeader = req.headers['authorization'];
-  console.log(authHeader);
+
+  if(!authHeader) return res.status(401).send("Token required");
 
   const token = authHeader.replaceAll('"', '');
 //remove "" from string 
-
-  console.log("i am here")
-  console.log(token);
-
-
-  if(!token) return res.status(401).send('Token required');
 
   jwt.verify(token, secretKey,(err, user)=>{
     if(err) return res.status(403).send('Invalid or expired token');
     req.user = user;
     next();
+    console.log("verified token")
   });
 };
 
@@ -55,16 +52,19 @@ app.listen(PORT, () => {
   console.log("Server running on port: " + PORT)
 });
 
-app.get('/', (req, res) =>
+app.get('/notes',authenticateToken, (req, res) =>{
+  console.log("test");
   res.sendFile(path.join(__dirname, '/public/index.html'))
+}
 );
 
-app.post('/save', (req, res) => {
+app.post('/save',authenticateToken, (req, res) => {
   console.log(req.body);
   res.send("sending post response");
   fs.writeFile('notes.json', JSON.stringify(req.body), function(err){
     if(err)throw err;
     console.log("saved!");
+    
   });
 });
 
@@ -79,7 +79,19 @@ app.get('/signup',(req,res)=>{
 
 
 app.post('/signup',async(req, res)=>{
+  console.log("debug");
+  console.log(req.body);
   const{username, password}=req.body;
+
+  
+  if(usersObj.users.find(o => o.name === username)){
+    console.log("duplicate username!");
+    res.status(401).send('Username already taken');
+    return;
+  }
+  console.log("continuing");
+
+//fix this. users.json keeps getting wiped
 
   //convert password to hash
   const hashedPassword = await bcrypt.hash(password,8);
@@ -93,35 +105,26 @@ app.post('/signup',async(req, res)=>{
     console.log("updated user file!");
   });
 
-  
-
-  
-  
-
   //convert array of objects to json
 
-  
   // Write cars object to file
 
-
-
-
-/*
-
-  fs.appendFile('users.json', JSON.stringify({username, password: hashedPassword}), function(err){
-    if(err)throw err;
-    console.log("user added!");
-  });
-*/
   res.status(201).send('User added!');
 
 });
 
+
 //recieve post req, validate user, and create token
+app.get('/login',(req,res)=>{
+  res.sendFile(path.join(__dirname, '/public/login.html'))
+})
+
+
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
-  
+  console.log(req.body);
   var currentUser = usersObj.users.find(o => o.name === username);
+
 //  const user = usersObj.find(u => u.username === username);
 
   if (!currentUser || !(await bcrypt.compare(password, currentUser.password))) {
@@ -130,7 +133,9 @@ app.post('/login', async (req, res) => {
 
   // Generate token
   const token = jwt.sign({ userId: currentUser.name }, secretKey, { expiresIn: '1h' });
-  res.status(200).send({ token });
+  
+  res.status(201).send({ token });
+
 });
 
 //generating JWT
