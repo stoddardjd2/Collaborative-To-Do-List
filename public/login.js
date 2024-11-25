@@ -31,7 +31,6 @@ window.onload = function () {
                 addToken(response.token);
                 //call function to add token to local storage
 
-
                 window.location.href = "http://localhost:3001/"; 
             }
         });

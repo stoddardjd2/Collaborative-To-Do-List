@@ -2,10 +2,6 @@
 let notes = [];
 window.onload = function () {
 
-  var test = (u=>u.username === username);
-  console.log(test);
-  console.log("running!");
-
 
   var newNoteBtn = document.getElementById("newNote");
   var saveBtn = document.getElementById('save');
@@ -15,6 +11,7 @@ window.onload = function () {
   var undoBtn = document.getElementById("undo");
   var hasEventListener;
   var loginBtn = document.getElementById("login");
+  var homeBtn = document.getElementById("home");
 
   var undoTracker = [];
 
@@ -24,6 +21,7 @@ window.onload = function () {
   deleteNoteListener();
   undoListener();
   loginBtn.addEventListener("click",loginListener);
+  homeBtn.addEventListener("click", homeListener);
 
 
   function newNoteListener() {
@@ -216,6 +214,26 @@ window.onload = function () {
 
   function loginListener(){
     window.location.href="http://localhost:3001/login";
+  }
+
+  function homeListener(){
+    console.log("Home!");
+    fetch("/home",{
+      method: "GET",
+      headers: {
+        authorization: localStorage.getItem('token'),
+        "Content-type": "application/json; charset=UTF-8"
+      },
+    }).then(response=>{ if (response.ok) {
+      console.log("approved");
+      window.location.href="http://localhost:3001/home"
+    } else {
+      throw new Error('error');
+
+    }
+
+     
+  });
   }
   //iterates through an array of objects that store each posssible undo request. undo request then sorted based on action needed to be peformed to complete the undo request
 

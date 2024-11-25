@@ -59,7 +59,14 @@ app.get('/notes',authenticateToken, (req, res) =>{
 );
 
 app.post('/save',authenticateToken, (req, res) => {
+  console.log("debug save")
   console.log(req.body);
+
+  //add user id to notes\
+  console.log("debug save2")
+  var UserNote = {id:"JARED", notes: req.body}
+  console.log(UserNote);
+  
   res.send("sending post response");
   fs.writeFile('notes.json', JSON.stringify(req.body), function(err){
     if(err)throw err;
@@ -144,6 +151,13 @@ app.get('/dashboard', authenticateToken, (req, res) => {
   res.status(200).send('Welcome to the dashboard, ' + req.body.username);
 
  // res.status(200).send('Welcome to the dashboard, ' + req.user.userId);
+});
+
+
+app.get('/home',(req,res)=>{
+  console.log("sending home page");
+  console.log("sending home page2");
+  res.sendFile(path.join(__dirname, '/private/home.html'))
 });
 
 
