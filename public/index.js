@@ -1,7 +1,8 @@
 
 let notes = [];
-
 window.onload = function () {
+
+
   var newNoteBtn = document.getElementById("newNote");
   var saveBtn = document.getElementById('save');
   var deleteBtn = document.getElementById('delete')
@@ -9,6 +10,8 @@ window.onload = function () {
   var ul = document.getElementById("notes");
   var undoBtn = document.getElementById("undo");
   var hasEventListener;
+  var loginBtn = document.getElementById("login");
+  var homeBtn = document.getElementById("home");
 
   var undoTracker = [];
 
@@ -17,6 +20,9 @@ window.onload = function () {
   saveNoteListener();
   deleteNoteListener();
   undoListener();
+  loginBtn.addEventListener("click",loginListener);
+  homeBtn.addEventListener("click", homeListener);
+
 
   function newNoteListener() {
     newNoteBtn.addEventListener("click", function () {
@@ -25,7 +31,6 @@ window.onload = function () {
       textarea.innerHTML = "new note!";
       li.appendChild(textarea);
       ul.appendChild(li);
-
 
       undoTracker.push({
         action: "remove",
@@ -45,8 +50,6 @@ window.onload = function () {
       for (i = 0; i <= list.length - 1; i++) {
         var text = list[i].getElementsByTagName("textarea")[0].value;
 
-        console.log("text:");
-        console.log(text);
         notes.push({
           id: i,
           noteText: text
@@ -54,15 +57,10 @@ window.onload = function () {
       }
       //save innerText of each li to an object to be sent as a post request
 
-      console.log(notes)
-
       saveReq();
       //get text value of each li to be sent to server and saved in database
 
       //add feature to detect which notes were changed and save only what is needed
-
-
-
     });
   }
 
@@ -70,13 +68,21 @@ window.onload = function () {
   function saveReq() {
     fetch('/save', {
       method: "POST",
+      headers: {
+        authorization: localStorage.getItem('token'),
+        "Content-type": "application/json; charset=UTF-8"
+      },
       body: JSON.stringify({
         notes
       }),
-      headers: {
-        "Content-type": "application/json; charset=UTF-8"
+    }) .then(response=>{
+      if(!response.ok){
+        console.log("Not authorized, please log in to make changes");
+      }else{
+        console.log("Save authorized");
       }
-    })
+
+    });
   }
 
 
@@ -205,6 +211,31 @@ window.onload = function () {
     })
 
   }
+
+  function loginListener(){
+    window.location.href="http://localhost:3001/login";
+  }
+
+  function homeListener(){
+    console.log("Home!");
+    fetch("/home",{
+      method: "GET",
+      headers: {
+        authorization: localStorage.getItem('token'),
+        "Content-type": "application/json; charset=UTF-8"
+      },
+    }).then(response=>{ if (response.ok) {
+      console.log("approved");
+      window.location.href="http://localhost:3001/home"
+    } else {
+      throw new Error('error');
+
+    }
+
+     
+  });
+  }
   //iterates through an array of objects that store each posssible undo request. undo request then sorted based on action needed to be peformed to complete the undo request
 
 }
+//if token not present:
